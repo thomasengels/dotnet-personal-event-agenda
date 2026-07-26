@@ -3,7 +3,7 @@ name: Build and deploy BFF to an Azure Web App
 env:
   AZURE_WEBAPP_NAME: your-bff-app-name
   AZURE_WEBAPP_PACKAGE_PATH: '.'
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
   BUILD_CONFIGURATION: Release
   BFF_PROJECT_PATH: 'Bff/Bff.Api/Bff.Api.csproj'
   DEPLOYMENT_ENVIRONMENT_NAME: Development
