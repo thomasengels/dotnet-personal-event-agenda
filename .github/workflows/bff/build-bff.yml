@@ -1,8 +1,11 @@
 name: Build and deploy BFF to an Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: your-bff-app-name
+  CONTAINER_APP_NAME: your-bff-container-app
+  RESOURCE_GROUP: your-resource-group
   REGISTRY_LOGIN_SERVER: your-registry.azurecr.io
+  ACR_NAME: your-registry
+  KEY_VAULT_NAME: your-key-vault
   IMAGE_NAME: bff-api
   BFF_DOCKERFILE: 'Bff/Bff.Api/Dockerfile'
   BFF_BUILD_CONTEXT: 'Bff'
@@ -21,9 +24,10 @@ jobs:
       build_context: ${{ env.BFF_BUILD_CONTEXT }}
       image_name: ${{ env.IMAGE_NAME }}
       registry_login_server: ${{ env.REGISTRY_LOGIN_SERVER }}
-      azure_webapp_name: ${{ env.AZURE_WEBAPP_NAME }}
+      acr_name: ${{ env.ACR_NAME }}
+      container_app_name: ${{ env.CONTAINER_APP_NAME }}
+      resource_group: ${{ env.RESOURCE_GROUP }}
+      key_vault_name: ${{ env.KEY_VAULT_NAME }}
       environment_name: ${{ env.DEPLOYMENT_ENVIRONMENT_NAME }}
     secrets:
-      registry_username: ${{ secrets.REGISTRY_USERNAME }}
-      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
-      azure_webapp_publish_profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BFF }}
+      azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
