@@ -1,11 +1,11 @@
-name: Build and deploy EventServiceApi to an Azure Web App
+name: Build and deploy Agenda to an Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: your-events-app-name
+  AZURE_WEBAPP_NAME: your-agenda-app-name
   REGISTRY_LOGIN_SERVER: your-registry.azurecr.io
-  IMAGE_NAME: event-api
-  EVENT_DOCKERFILE: 'Event/Event.Api/Dockerfile'
-  EVENT_BUILD_CONTEXT: 'Event'
+  IMAGE_NAME: agenda-api
+  AGENDA_DOCKERFILE: 'Agenda/Agenda.Api/Dockerfile'
+  AGENDA_BUILD_CONTEXT: 'Agenda'
   DEPLOYMENT_ENVIRONMENT_NAME: Development
 
 on:
@@ -17,8 +17,8 @@ jobs:
   build-and-deploy:
     uses: ./.github/workflows/shared/build-and-deploy-dotnet-webapp.yml
     with:
-      dockerfile: ${{ env.EVENT_DOCKERFILE }}
-      build_context: ${{ env.EVENT_BUILD_CONTEXT }}
+      dockerfile: ${{ env.AGENDA_DOCKERFILE }}
+      build_context: ${{ env.AGENDA_BUILD_CONTEXT }}
       image_name: ${{ env.IMAGE_NAME }}
       registry_login_server: ${{ env.REGISTRY_LOGIN_SERVER }}
       azure_webapp_name: ${{ env.AZURE_WEBAPP_NAME }}
@@ -26,4 +26,4 @@ jobs:
     secrets:
       registry_username: ${{ secrets.REGISTRY_USERNAME }}
       registry_password: ${{ secrets.REGISTRY_PASSWORD }}
-      azure_webapp_publish_profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      azure_webapp_publish_profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_AGENDA }}
