@@ -5,7 +5,7 @@ env:
   AZURE_WEBAPP_PACKAGE_PATH: '.'
   DOTNET_VERSION: '8.0.x'
   BUILD_CONFIGURATION: Release
-  BFF_PROJECT_PATH: 'BFF/BFF.csproj'
+  BFF_PROJECT_PATH: 'Bff/Bff.Api/Bff.Api.csproj'
   DEPLOYMENT_ENVIRONMENT_NAME: Development
 
 on:

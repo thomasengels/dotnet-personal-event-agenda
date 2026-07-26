@@ -1,0 +1,12 @@
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/bin/Debug/net8.0/Bff.Domain.deps.json
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/bin/Debug/net8.0/Bff.Domain.dll
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/bin/Debug/net8.0/Bff.Domain.pdb
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/Bff.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/Bff.Domain.AssemblyInfoInputs.cache
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/Bff.Domain.AssemblyInfo.cs
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/Bff.Domain.csproj.CoreCompileInputs.cache
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/Bff.Domain.sourcelink.json
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/Bff.Domain.dll
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/refint/Bff.Domain.dll
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/Bff.Domain.pdb
+/Users/thomas.engels/PersonalEventPlanner/Bff/Bff.Domain/obj/Debug/net8.0/ref/Bff.Domain.dll

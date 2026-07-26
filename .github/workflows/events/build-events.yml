@@ -5,7 +5,7 @@ env:
   AZURE_WEBAPP_PACKAGE_PATH: '.'
   DOTNET_VERSION: '8.0.x'
   BUILD_CONFIGURATION: Release
-  EVENTSERVICEAPI_PROJECT_PATH: 'EventService/EventServiceApi/EventServiceApi.csproj'
+  EVENTSERVICEAPI_PROJECT_PATH: 'Event/Event.Api/Event.Api.csproj'
   DEPLOYMENT_ENVIRONMENT_NAME: Development
 
 on:
