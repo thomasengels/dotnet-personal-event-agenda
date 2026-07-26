@@ -1,11 +1,11 @@
-name: Build and deploy EventServiceApi to an Azure Web App
+name: Build and deploy EventServiceApi to Azure Container Apps
 
 env:
-  CONTAINER_APP_NAME: your-events-container-app
-  RESOURCE_GROUP: your-resource-group
-  REGISTRY_LOGIN_SERVER: your-registry.azurecr.io
-  ACR_NAME: your-registry
-  KEY_VAULT_NAME: your-key-vault
+  CONTAINER_APP_NAME: events
+  RESOURCE_GROUP: event-agenda-project
+  REGISTRY_LOGIN_SERVER: event-agenda-registry.azurecr.io
+  ACR_NAME: event-agenda-registry
+  KEY_VAULT_NAME: event-agenda-kv
   IMAGE_NAME: event-api
   EVENT_DOCKERFILE: 'Event/Event.Api/Dockerfile'
   EVENT_BUILD_CONTEXT: 'Event'
