@@ -1,0 +1,27 @@
+name: Build and deploy BFF to an Azure Web App
+
+env:
+  AZURE_WEBAPP_NAME: your-bff-app-name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  DOTNET_VERSION: '8.0.x'
+  BUILD_CONFIGURATION: Release
+  BFF_PROJECT_PATH: 'BFF/BFF.csproj'
+  DEPLOYMENT_ENVIRONMENT_NAME: Development
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    uses: ./.github/workflows/shared/build-and-deploy-dotnet-webapp.yml
+    with:
+      dotnet_version: ${{ env.DOTNET_VERSION }}
+      project_path: ${{ env.BFF_PROJECT_PATH }}
+      build_configuration: ${{ env.BUILD_CONFIGURATION }}
+      azure_webapp_name: ${{ env.AZURE_WEBAPP_NAME }}
+      azure_webapp_package_path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      environment_name: ${{ env.DEPLOYMENT_ENVIRONMENT_NAME }}
+    secrets:
+      azure_webapp_publish_profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BFF }}

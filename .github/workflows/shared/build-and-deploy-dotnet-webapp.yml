@@ -1,0 +1,92 @@
+name: Shared - Build and deploy ASP.Net Core app to Azure Web App
+
+on:
+  workflow_call:
+    inputs:
+      dotnet_version:
+        type: string
+        required: false
+        default: '8.0.x'
+      project_path:
+        type: string
+        required: true
+      build_configuration:
+        type: string
+        required: false
+        default: Release
+      azure_webapp_name:
+        type: string
+        required: true
+      azure_webapp_package_path:
+        type: string
+        required: false
+        default: '.'
+      environment_name:
+        type: string
+        required: false
+        default: Development
+    secrets:
+      azure_webapp_publish_profile:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet_version }}
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build with dotnet
+        run: dotnet build "${{ inputs.project_path }}" --configuration "${{ inputs.build_configuration }}"
+
+      - name: Test with dotnet
+        run: dotnet test "${{ inputs.project_path }}" --configuration "${{ inputs.build_configuration }}" --no-build
+
+      - name: dotnet publish
+        run: dotnet publish "${{ inputs.project_path }}" -c "${{ inputs.build_configuration }}" -o ${{env.DOTNET_ROOT}}/myapp --no-build
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: ${{ inputs.environment_name }}
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: .
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ inputs.azure_webapp_name }}
+          publish-profile: ${{ secrets.azure_webapp_publish_profile }}
+          package: ${{ inputs.azure_webapp_package_path }}
