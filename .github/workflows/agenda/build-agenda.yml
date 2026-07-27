@@ -3,8 +3,8 @@ name: Build and deploy Agenda to Azure Container Apps
 env:
   CONTAINER_APP_NAME: agenda
   RESOURCE_GROUP: event-agenda-project
-  REGISTRY_LOGIN_SERVER: event-agenda-registry.azurecr.io
-  ACR_NAME: event-agenda-registry
+  REGISTRY_LOGIN_SERVER: eventagendaregistry.azurecr.io
+  ACR_NAME: eventagendaregistry
   KEY_VAULT_NAME: event-agenda-kv
   IMAGE_NAME: agenda-api
   AGENDA_DOCKERFILE: 'Agenda/Agenda.Api/Dockerfile'
