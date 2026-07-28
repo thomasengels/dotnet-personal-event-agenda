@@ -1,0 +1,56 @@
+## .NET build outputs
+[Bb]in/
+[Oo]bj/
+out/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.code-workspace
+
+## User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+!**/packages/build/
+
+## Rider
+.idea/
+*.sln.iml
+
+## Test results & coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+
+## Logs and temp files
+*.log
+*.tmp
+*.temp
+*.cache
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## Local secrets / environment files
+.env
+.env.*
+secrets.json
+appsettings.Local.json
+
+## Dotnet local tools and profiling
+.dotnet/
+BenchmarkDotNet.Artifacts/
