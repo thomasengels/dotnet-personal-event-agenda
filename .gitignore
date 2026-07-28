@@ -18,6 +18,10 @@ out/
 *.userosscache
 *.sln.docstates
 
+bin
+obj
+packages
+
 ## NuGet
 *.nupkg
 *.snupkg
