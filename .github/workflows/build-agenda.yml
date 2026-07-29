@@ -26,7 +26,7 @@ jobs:
       container_app_name: agenda
       resource_group: event-agenda-project
       key_vault_name: event-agenda-kv
-      environment_name: Development
+      environment_name: development
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

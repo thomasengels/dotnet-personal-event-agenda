@@ -58,7 +58,7 @@ on:
       environment_name:
         type: string
         required: false
-        default: Development
+        default: development
     secrets:
       AZURE_CLIENT_ID:
         required: true
