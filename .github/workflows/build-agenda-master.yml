@@ -1,13 +1,12 @@
-name: Build and deploy Agenda to Azure Container Apps
+name: Build and deploy Agenda to production
 
 on:
   push:
     branches: [ "master" ]
     paths:
       - "Agenda/**"
-      - ".github/workflows/build-agenda.yml"
+      - ".github/workflows/build-agenda-master.yml"
       - ".github/workflows/build-and-deploy-dotnet-webapp.yml"
-  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -26,8 +25,10 @@ jobs:
       container_app_name: agenda
       resource_group: event-agenda-project
       key_vault_name: event-agenda-kv
-      environment_name: development
+      environment_name: production
+      deploy_enabled: false
+      publish_latest: true
     secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_PROD }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID_PROD }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}

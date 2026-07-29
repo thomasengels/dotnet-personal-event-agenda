@@ -1,0 +1,90 @@
+name: Deploy selected branch to development
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: Branch, tag, or commit SHA to deploy.
+        required: true
+        type: string
+      service:
+        description: Service to deploy.
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - agenda
+          - bff
+          - events
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-agenda:
+    if: ${{ inputs.service == 'all' || inputs.service == 'agenda' }}
+    uses: ./.github/workflows/build-and-deploy-dotnet-webapp.yml
+    with:
+      checkout_ref: ${{ inputs.target_branch }}
+      dockerfile: Agenda/Agenda.Api/Dockerfile
+      build_context: Agenda
+      dotnet_test_path: Agenda/Agenda.sln
+      image_name: agenda-api
+      registry_login_server: eventagendaregistry.azurecr.io
+      acr_name: eventagendaregistry
+      container_app_name: agenda
+      resource_group: event-agenda-project-dev
+      key_vault_name: event-agenda-kv
+      environment_name: development
+      deploy_enabled: true
+      publish_latest: false
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID_DEV }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+
+  deploy-bff:
+    if: ${{ inputs.service == 'all' || inputs.service == 'bff' }}
+    uses: ./.github/workflows/build-and-deploy-dotnet-webapp.yml
+    with:
+      checkout_ref: ${{ inputs.target_branch }}
+      dockerfile: Bff/Bff.Api/Dockerfile
+      build_context: Bff
+      dotnet_test_path: Bff/Bff.sln
+      image_name: bff-api
+      registry_login_server: eventagendaregistry.azurecr.io
+      acr_name: eventagendaregistry
+      container_app_name: bff
+      resource_group: event-agenda-project-dev
+      key_vault_name: event-agenda-kv
+      environment_name: development
+      deploy_enabled: true
+      publish_latest: false
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID_DEV }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}
+
+  deploy-events:
+    if: ${{ inputs.service == 'all' || inputs.service == 'events' }}
+    uses: ./.github/workflows/build-and-deploy-dotnet-webapp.yml
+    with:
+      checkout_ref: ${{ inputs.target_branch }}
+      dockerfile: Event/Event.Api/Dockerfile
+      build_context: Event
+      dotnet_test_path: Event/Event.sln
+      image_name: event-api
+      registry_login_server: eventagendaregistry.azurecr.io
+      acr_name: eventagendaregistry
+      container_app_name: events
+      resource_group: event-agenda-project-dev
+      key_vault_name: event-agenda-kv
+      environment_name: development
+      deploy_enabled: true
+      publish_latest: false
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_DEV }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID_DEV }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}

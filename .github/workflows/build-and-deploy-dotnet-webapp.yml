@@ -16,6 +16,11 @@ on:
         type: string
         required: false
         default: .
+      checkout_ref:
+        description: Git ref (branch, tag, or SHA) to checkout for build/test/publish/deploy.
+        type: string
+        required: false
+        default: ""
       dotnet_sdk_version:
         description: .NET SDK version to use.
         type: string
@@ -59,6 +64,16 @@ on:
         type: string
         required: false
         default: development
+      deploy_enabled:
+        description: Whether deployment should run after build and push.
+        type: boolean
+        required: false
+        default: true
+      publish_latest:
+        description: Whether to also publish the mutable :latest tag.
+        type: boolean
+        required: false
+        default: false
     secrets:
       AZURE_CLIENT_ID:
         required: true
@@ -76,6 +91,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref || github.ref }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
@@ -110,6 +127,8 @@ jobs:
       image: ${{ steps.meta.outputs.image }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref || github.ref }}
 
       - name: Log in to Azure
         uses: azure/login@v3
@@ -149,11 +168,12 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.image }}
-            ${{ inputs.registry_login_server }}/${{ inputs.image_name }}:latest
+            ${{ inputs.publish_latest && format('{0}/{1}:latest', inputs.registry_login_server, inputs.image_name) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
+    if: ${{ inputs.deploy_enabled }}
     permissions:
       id-token: write
       contents: none

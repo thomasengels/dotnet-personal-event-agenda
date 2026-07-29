@@ -1,0 +1,60 @@
+name: Deploy production from existing image
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to deploy.
+        required: true
+        type: choice
+        default: agenda
+        options:
+          - agenda
+          - bff
+          - events
+      image_tag:
+        description: Immutable image tag to deploy (usually commit SHA).
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - service: agenda
+            image_name: agenda-api
+            container_app_name: agenda
+          - service: bff
+            image_name: bff-api
+            container_app_name: bff
+          - service: events
+            image_name: event-api
+            container_app_name: events
+    if: ${{ matrix.service == inputs.service }}
+    concurrency:
+      group: deploy-${{ matrix.container_app_name }}-production
+      cancel-in-progress: false
+    environment:
+      name: production
+
+    steps:
+      - name: Log in to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID_PROD }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
+
+      - name: Deploy Container App revision
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          acrName: eventagendaregistry
+          containerAppName: ${{ matrix.container_app_name }}
+          resourceGroup: event-agenda-project
+          imageToDeploy: eventagendaregistry.azurecr.io/${{ matrix.image_name }}:${{ inputs.image_tag }}
