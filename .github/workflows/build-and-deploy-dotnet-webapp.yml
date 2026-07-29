@@ -176,4 +176,7 @@ jobs:
       - name: Deploy Container App revision
         uses: azure/container-apps-deploy-action@v1
         with:
-          imageToDeploy: ${{ needs.build-and-push.outputs.image }}
+          acrName: ${{ inputs.acr_name }}
+          containerAppName: ${{ inputs.container_app_name }}
+          resourceGroup: ${{ inputs.resource_group }}
+          imageToDeploy: ${{ needs['build-and-push'].outputs.image }}
