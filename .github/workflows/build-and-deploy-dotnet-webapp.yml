@@ -43,7 +43,7 @@ on:
         type: string
         required: true
       resource_group:
-        description: Resource group that contains the Container App and registry.
+        description: Resource group that contains the target Container App.
         type: string
         required: true
       key_vault_name:
@@ -61,6 +61,7 @@ on:
         required: false
         default: registry-password
       environment_name:
+        description: GitHub Environment name used for OIDC and deployment protection rules.
         type: string
         required: false
         default: development
@@ -135,9 +136,9 @@ jobs:
       - name: Log in to Azure
         uses: azure/login@v3
         with:
-           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Fetch registry credentials from Key Vault
         run: |
@@ -191,9 +192,9 @@ jobs:
       - name: Log in to Azure
         uses: azure/login@v3
         with:
-           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy Container App revision
         uses: azure/container-apps-deploy-action@v1
@@ -201,4 +202,4 @@ jobs:
           acrName: ${{ inputs.acr_name }}
           containerAppName: ${{ inputs.container_app_name }}
           resourceGroup: ${{ inputs.resource_group }}
-          imageToDeploy: ${{ inputs.registry_login_server }}/${{ inputs.image_name }}:${{ github.sha }}
+          imageToDeploy: ${{ needs.build_and_push.outputs.image }}
