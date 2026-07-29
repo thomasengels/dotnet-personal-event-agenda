@@ -1,0 +1,33 @@
+name: Build and deploy BFF to Azure Container Apps
+
+env:
+  CONTAINER_APP_NAME: bff
+  RESOURCE_GROUP: event-agenda-project
+  REGISTRY_LOGIN_SERVER: eventagendaregistry.azurecr.io
+  ACR_NAME: eventagendaregistry
+  KEY_VAULT_NAME: event-agenda-kv
+  IMAGE_NAME: bff-api
+  BFF_DOCKERFILE: 'Bff/Bff.Api/Dockerfile'
+  BFF_BUILD_CONTEXT: 'Bff'
+  DEPLOYMENT_ENVIRONMENT_NAME: Development
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    uses: ./.github/workflows/shared/build-and-deploy-dotnet-webapp.yml
+    with:
+      dockerfile: ${{ env.BFF_DOCKERFILE }}
+      build_context: ${{ env.BFF_BUILD_CONTEXT }}
+      image_name: ${{ env.IMAGE_NAME }}
+      registry_login_server: ${{ env.REGISTRY_LOGIN_SERVER }}
+      acr_name: ${{ env.ACR_NAME }}
+      container_app_name: ${{ env.CONTAINER_APP_NAME }}
+      resource_group: ${{ env.RESOURCE_GROUP }}
+      key_vault_name: ${{ env.KEY_VAULT_NAME }}
+      environment_name: ${{ env.DEPLOYMENT_ENVIRONMENT_NAME }}
+    secrets:
+      azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}

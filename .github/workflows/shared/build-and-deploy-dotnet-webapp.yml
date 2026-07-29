@@ -1,0 +1,127 @@
+name: Shared - Build and deploy container to Azure Container Apps
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        description: Path to the Dockerfile, relative to the repository root.
+        type: string
+        required: true
+      build_context:
+        description: Docker build context path, relative to the repository root.
+        type: string
+        required: true
+      image_name:
+        description: Image repository name (without registry or tag), e.g. "event-api".
+        type: string
+        required: true
+      registry_login_server:
+        description: Container registry login server, e.g. "myregistry.azurecr.io".
+        type: string
+        required: true
+      acr_name:
+        description: Azure Container Registry name (without .azurecr.io), e.g. "myregistry".
+        type: string
+        required: true
+      container_app_name:
+        description: Name of the target Azure Container App.
+        type: string
+        required: true
+      resource_group:
+        description: Resource group that contains the Container App and registry.
+        type: string
+        required: true
+      key_vault_name:
+        description: Azure Key Vault name that stores the registry credentials.
+        type: string
+        required: true
+      registry_username_secret_name:
+        description: Key Vault secret name holding the registry username.
+        type: string
+        required: false
+        default: registry-username
+      registry_password_secret_name:
+        description: Key Vault secret name holding the registry password.
+        type: string
+        required: false
+        default: registry-password
+      environment_name:
+        type: string
+        required: false
+        default: Development
+    secrets:
+      azure_credentials:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.azure_credentials }}
+
+      - name: Fetch registry credentials from Key Vault
+        run: |
+          username=$(az keyvault secret show --vault-name "${{ inputs.key_vault_name }}" --name "${{ inputs.registry_username_secret_name }}" --query value -o tsv)
+          password=$(az keyvault secret show --vault-name "${{ inputs.key_vault_name }}" --name "${{ inputs.registry_password_secret_name }}" --query value -o tsv)
+          echo "::add-mask::$username"
+          echo "::add-mask::$password"
+          echo "REGISTRY_USERNAME=$username" >> "$GITHUB_ENV"
+          echo "REGISTRY_PASSWORD=$password" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ inputs.registry_login_server }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+
+      - name: Compute image reference
+        id: meta
+        run: echo "image=${{ inputs.registry_login_server }}/${{ inputs.image_name }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.build_context }}
+          file: ${{ inputs.dockerfile }}
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}
+            ${{ inputs.registry_login_server }}/${{ inputs.image_name }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment:
+      name: ${{ inputs.environment_name }}
+
+    steps:
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.azure_credentials }}
+
+      - name: Build and deploy Container App
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          acrName: ${{ inputs.acr_name }}
+          containerAppName: ${{ inputs.container_app_name }}
+          resourceGroup: ${{ inputs.resource_group }}
+          imageToDeploy: ${{ needs.build-and-push.outputs.image }}
