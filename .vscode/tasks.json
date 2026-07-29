@@ -1,0 +1,69 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run BFF API",
+      "type": "shell",
+      "dependsOn": [
+        "Run Agenda API",
+        "Run Event API"
+      ],
+      "dependsOrder": "parallel",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "Bff/Bff.Api/Bff.Api.csproj"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "apis"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Agenda API",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "Agenda/Agenda.Api/Agenda.Api.csproj"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "apis"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Event API",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "Event/Event.Api/Event.Api.csproj"
+      ],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "apis"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run All APIs",
+      "dependsOn": [
+        "Run BFF API"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    }
+  ]
+}
