@@ -8,8 +8,8 @@ It only includes changes that made real progress and are still part of the activ
 ## High-Level Flow
 1. A service-specific workflow starts on push to master for its own folder, or via manual dispatch.
 2. The service-specific workflow calls one shared reusable workflow.
-3. The shared workflow runs three jobs in sequence: ci, build-and-push, deploy.
-4. The build-and-push job logs into Azure with OIDC, reads ACR credentials from Key Vault, builds and pushes image to ACR.
+3. The shared workflow runs three jobs in sequence: ci, build_and_push, deploy.
+4. The build_and_push job logs into Azure with OIDC, reads ACR credentials from Key Vault, builds and pushes image to ACR.
 5. The deploy job logs into Azure with OIDC and deploys the new image to Azure Container Apps.
 
 ## Workflow Topology
@@ -47,7 +47,7 @@ Each service workflow passes shared Azure secrets into the reusable workflow:
 5. Test in Release mode.
 6. Upload test result artifacts.
 
-### build-and-push
+### build_and_push
 1. Login to Azure using azure/login with client-id, tenant-id, subscription-id.
 2. Read registry username and password from Key Vault secrets.
 3. Login to ACR using retrieved credentials.
@@ -59,7 +59,8 @@ Each service workflow passes shared Azure secrets into the reusable workflow:
 ### deploy
 1. Login to Azure using azure/login.
 2. Deploy to Azure Container Apps with azure/container-apps-deploy-action.
-3. Concurrency lock prevents overlapping deployments per app and environment.
+3. Deploy image is passed deterministically as `${{ inputs.registry_login_server }}/${{ inputs.image_name }}:${{ github.sha }}`.
+4. Concurrency lock prevents overlapping deployments per app and environment.
 
 ## Identity and Security Architecture
 ### GitHub to Azure Authentication
@@ -120,6 +121,16 @@ These fixes unblocked failures and are part of the current setup:
 4. Federated credentials were aligned to the exact presented subject format emitted by GitHub for this repository.
 5. environment naming was normalized to lowercase development to match the active GitHub Environment and OIDC subject.
 6. Key Vault Secrets User role was assigned so Key Vault secret reads succeed.
+7. Deploy image wiring was stabilized by using a deterministic image reference in deploy instead of relying on cross-job output propagation.
+
+## Verification Status
+Latest validation commit:
+1. c82b8f7b5b2693c65c32974dd9387b4bdd8dc857
+
+Verified successful workflow runs on that commit:
+1. Build and deploy EventServiceApi to Azure Container Apps (run 30460001817)
+2. Build and deploy BFF to Azure Container Apps (run 30460001702)
+3. Build and deploy Agenda to Azure Container Apps (run 30460008906)
 
 ## Operational Notes
 1. If Azure login fails with No matching federated identity, check the exact subject shown in the error and compare to Entra federated credential subjects.
