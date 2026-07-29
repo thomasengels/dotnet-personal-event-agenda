@@ -38,6 +38,7 @@ jobs:
       key_vault_name: event-agenda-kv
       environment_name: development
       deploy_enabled: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_to_development == 'yes' }}
+      ci_only: ${{ github.event_name == 'push' }}
       publish_latest: false
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_DEV }}
