@@ -18,7 +18,7 @@ on:
 
 jobs:
   build-and-deploy:
-    uses: ./.github/workflows/shared/build-and-deploy-dotnet-webapp.yml
+    uses: ./.github/workflows/build-and-deploy-dotnet-webapp.yml
     with:
       dockerfile: ${{ env.BFF_DOCKERFILE }}
       build_context: ${{ env.BFF_BUILD_CONTEXT }}
