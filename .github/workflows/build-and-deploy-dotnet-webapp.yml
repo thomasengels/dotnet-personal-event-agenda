@@ -74,18 +74,13 @@ on:
         type: boolean
         required: false
         default: false
-      ci_only:
-        description: When true, only run CI (restore/build/test). Skip ACR push and deploy entirely. No Azure credentials are needed.
-        type: boolean
-        required: false
-        default: false
     secrets:
       AZURE_CLIENT_ID:
-        required: false
+        required: true
       AZURE_TENANT_ID:
-        required: false
+        required: true
       AZURE_SUBSCRIPTION_ID:
-        required: false
+        required: true
 
 permissions:
   id-token: write
@@ -126,9 +121,10 @@ jobs:
           if-no-files-found: warn
 
   build_and_push:
-    if: ${{ !inputs.ci_only }}
     runs-on: ubuntu-latest
     needs: ci
+    environment:
+      name: ${{ inputs.environment_name }}
     outputs:
       image: ${{ steps.meta.outputs.image }}
     steps:
@@ -179,7 +175,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    if: ${{ !inputs.ci_only && inputs.deploy_enabled }}
+    if: ${{ inputs.deploy_enabled }}
     permissions:
       id-token: write
       contents: none

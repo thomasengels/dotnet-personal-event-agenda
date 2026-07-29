@@ -1,4 +1,4 @@
-name: Deploy selected branch to development
+name: Deploy to Development
 
 on:
   workflow_dispatch:
