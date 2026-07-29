@@ -35,3 +35,20 @@
     - Rationale:
        - The image reference is deterministic and equals the image produced in `build_and_push`.
        - This removes dependency on reusable-workflow job output propagation for the deploy action input.
+6. Validated and published fix:
+   - Ran YAML parse check for `.github/workflows/build-and-deploy-dotnet-webapp.yml`.
+   - Commit created: `c82b8f7`.
+   - Commit message: `Fix deploy image argument resolution and log troubleshooting`.
+   - Pushed to `origin/master`.
+7. Monitored new workflow runs triggered by commit `c82b8f7b5b2693c65c32974dd9387b4bdd8dc857`:
+   - EventServiceApi run: `30460001817`.
+   - BFF run: `30460001702`.
+   - Agenda run: `30460008906`.
+8. Final outcomes of retried build/deploy runs:
+   - `Build and deploy EventServiceApi to Azure Container Apps`: `success`.
+   - `Build and deploy BFF to Azure Container Apps`: `success`.
+   - `Build and deploy Agenda to Azure Container Apps`: `success`.
+
+## Final Resolution
+- The failing deploy validation (`appSourcePath/imageToDeploy/yamlConfigPath`) was resolved by explicitly constructing `imageToDeploy` in the deploy step from deterministic inputs and commit SHA.
+- Current state: all three service workflows complete successfully on latest commit.
