@@ -3,6 +3,10 @@ name: Build and deploy EventServiceApi to Azure Container Apps
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "Event/**"
+      - ".github/workflows/build-events.yml"
+      - ".github/workflows/build-and-deploy-dotnet-webapp.yml"
   workflow_dispatch:
 
 jobs:
@@ -11,6 +15,7 @@ jobs:
     with:
       dockerfile: Event/Event.Api/Dockerfile
       build_context: Event
+      dotnet_test_path: Event/Event.sln
       image_name: event-api
       registry_login_server: eventagendaregistry.azurecr.io
       acr_name: eventagendaregistry

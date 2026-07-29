@@ -11,6 +11,16 @@ on:
         description: Docker build context path, relative to the repository root.
         type: string
         required: true
+      dotnet_test_path:
+        description: Solution or project path used for restore/build/test, relative to repository root.
+        type: string
+        required: false
+        default: .
+      dotnet_sdk_version:
+        description: .NET SDK version to use.
+        type: string
+        required: false
+        default: 10.0.x
       image_name:
         description: Image repository name (without registry or tag), e.g. "event-api".
         type: string
@@ -57,15 +67,47 @@ permissions:
   contents: read
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet_sdk_version }}
+          cache: true
+          cache-dependency-path: |
+            ${{ inputs.build_context }}/**/*.csproj
+            ${{ inputs.build_context }}/**/packages.lock.json
+
+      - name: Restore dependencies
+        run: dotnet restore "${{ inputs.dotnet_test_path }}"
+
+      - name: Build
+        run: dotnet build "${{ inputs.dotnet_test_path }}" --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test "${{ inputs.dotnet_test_path }}" --configuration Release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory "${{ github.workspace }}/.test-results/${{ inputs.image_name }}"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ inputs.image_name }}
+          path: ${{ github.workspace }}/.test-results/${{ inputs.image_name }}
+          if-no-files-found: warn
+
   build-and-push:
     runs-on: ubuntu-latest
+    needs: ci
     outputs:
       image: ${{ steps.meta.outputs.image }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Log in to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.azure_credentials }}
 
@@ -109,16 +151,19 @@ jobs:
       contents: none
     runs-on: ubuntu-latest
     needs: build-and-push
+    concurrency:
+      group: deploy-${{ inputs.container_app_name }}-${{ inputs.environment_name }}
+      cancel-in-progress: false
     environment:
       name: ${{ inputs.environment_name }}
 
     steps:
       - name: Log in to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.azure_credentials }}
 
-      - name: Build and deploy Container App
+      - name: Deploy Container App revision
         uses: azure/container-apps-deploy-action@v1
         with:
           acrName: ${{ inputs.acr_name }}

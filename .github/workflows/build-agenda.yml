@@ -3,6 +3,10 @@ name: Build and deploy Agenda to Azure Container Apps
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "Agenda/**"
+      - ".github/workflows/build-agenda.yml"
+      - ".github/workflows/build-and-deploy-dotnet-webapp.yml"
   workflow_dispatch:
 
 jobs:
@@ -11,6 +15,7 @@ jobs:
     with:
       dockerfile: Agenda/Agenda.Api/Dockerfile
       build_context: Agenda
+      dotnet_test_path: Agenda/Agenda.sln
       image_name: agenda-api
       registry_login_server: eventagendaregistry.azurecr.io
       acr_name: eventagendaregistry
