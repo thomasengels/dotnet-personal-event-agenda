@@ -103,7 +103,7 @@ jobs:
           path: ${{ github.workspace }}/.test-results/${{ inputs.image_name }}
           if-no-files-found: warn
 
-  build-and-push:
+  build_and_push:
     runs-on: ubuntu-latest
     needs: ci
     outputs:
@@ -158,7 +158,7 @@ jobs:
       id-token: write
       contents: none
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: build_and_push
     concurrency:
       group: deploy-${{ inputs.container_app_name }}-${{ inputs.environment_name }}
       cancel-in-progress: false
@@ -179,4 +179,4 @@ jobs:
           acrName: ${{ inputs.acr_name }}
           containerAppName: ${{ inputs.container_app_name }}
           resourceGroup: ${{ inputs.resource_group }}
-          imageToDeploy: ${{ needs['build-and-push'].outputs.image }}
+          imageToDeploy: ${{ needs.build_and_push.outputs.image }}
