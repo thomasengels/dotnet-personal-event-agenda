@@ -25,7 +25,7 @@ Current API responsibilities:
 2. Agenda API exposes agenda endpoints (`/api/agenda`)
 3. BFF API exposes dashboard endpoints (`/api/dashboard/{userId}`)
 
-All APIs currently use a lightweight setup with controllers and OpenAPI in development.
+All APIs currently use a lightweight setup with controllers, OpenAPI JSON, and Scalar API reference UI.
 
 ```mermaid
 flowchart LR
@@ -69,6 +69,7 @@ API documentation:
 
 1. `Microsoft.AspNetCore.OpenApi` 10.0.0
 2. `Microsoft.OpenApi` 2.7.5
+3. `Scalar.AspNetCore` 2.16.16
 
 Containerization and deployment:
 
@@ -164,6 +165,6 @@ Configure these repository or environment secrets:
 
 ## Notes
 
-1. API OpenAPI documents are mapped only in development.
+1. API OpenAPI documents are available at `/openapi/v1.json`, and the Scalar API reference UI is available at `/scalar/v1`.
 2. There are currently no test projects in the repository, so `dotnet test` coverage is limited to what exists.
 3. For deeper deployment details and operational troubleshooting, see `architecture.md`.
