@@ -10,7 +10,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.MapOpenApi();                        // OpenAPI JSON at /openapi/v1.json
-app.MapScalarApiReference();             // Swagger UI at /scalar/v1
+app.MapScalarApiReference();             // Scalar API reference UI at /scalar/v1
 
 app.UseHttpsRedirection();
 
