@@ -41,6 +41,8 @@ flowchart LR
 ```text
 .
 |- EventPlanner.sln
+|- .agents/skills/no-mistakes/
+|- .claude/skills/no-mistakes/
 |- Bff/
 |  |- Bff.sln
 |  |- Bff.Api/
@@ -102,6 +104,17 @@ Or use the predefined VS Code tasks:
 2. `Run Event API`
 3. `Run Agenda API`
 4. `Run All APIs`
+
+## Agent Automation
+
+Repository-local no-mistakes skill instructions are available for supported
+agents:
+
+1. `.agents/skills/no-mistakes/SKILL.md`
+2. `.claude/skills/no-mistakes/SKILL.md`
+
+The skill guides agents through the no-mistakes validation pipeline with the
+`no-mistakes axi` command family.
 
 ## Deployment Model (Recommended)
 
