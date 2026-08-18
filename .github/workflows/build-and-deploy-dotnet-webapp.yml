@@ -167,3 +167,5 @@ jobs:
         uses: azure/container-apps-deploy-action@v1
         with:
           imageToDeploy: ${{ needs.build_and_push.outputs.image }}
+          containerAppName: ${{ inputs.container_app_name }}
+          resourceGroup: ${{ inputs.resource_group }}
