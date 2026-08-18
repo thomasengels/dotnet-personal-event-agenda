@@ -1,6 +1,22 @@
 @Event.Api_HostAddress = http://localhost:5149
 
-GET {{Event.Api_HostAddress}}/weatherforecast/
+POST {{Event.Api_HostAddress}}/api/events
+Content-Type: application/json
+
+{
+  "name": "Conference",
+  "description": "A conference.",
+  "street": "Main St 1",
+  "city": "Ghent",
+  "postalCode": "9000",
+  "country": "Belgium",
+  "startDate": "2026-01-01T10:00:00Z",
+  "endDate": "2026-01-01T12:00:00Z"
+}
+
+###
+
+GET {{Event.Api_HostAddress}}/api/events/00000000-0000-0000-0000-000000000000
 Accept: application/json
 
 ###
