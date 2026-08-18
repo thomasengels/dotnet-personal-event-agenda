@@ -7,6 +7,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  packages: write
 
 jobs:
   agenda:
@@ -18,9 +19,6 @@ jobs:
       image_name: agenda-api
       container_app_name: agenda
       resource_group: event-agenda-project
-      environment_name: production
-      deploy_enabled: true
-      publish_latest: true
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_PROD }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID_PROD }}
@@ -36,9 +34,6 @@ jobs:
       image_name: bff-api
       container_app_name: bff
       resource_group: event-agenda-project
-      environment_name: production
-      deploy_enabled: true
-      publish_latest: true
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_PROD }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID_PROD }}
@@ -54,9 +49,6 @@ jobs:
       image_name: event-api
       container_app_name: events
       resource_group: event-agenda-project
-      environment_name: production
-      deploy_enabled: true
-      publish_latest: true
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_PROD }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID_PROD }}

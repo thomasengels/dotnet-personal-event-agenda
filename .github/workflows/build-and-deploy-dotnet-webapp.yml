@@ -42,17 +42,7 @@ on:
         description: GitHub Environment name used for OIDC and deployment protection rules.
         type: string
         required: false
-        default: development
-      deploy_enabled:
-        description: Whether deployment should run after build and push.
-        type: boolean
-        required: false
-        default: true
-      publish_latest:
-        description: Whether to also publish the mutable :latest tag.
-        type: boolean
-        required: false
-        default: false
+        default: production
     secrets:
       AZURE_CLIENT_ID:
         required: true
@@ -140,12 +130,11 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.image }}
-            ${{ inputs.publish_latest && format('{0}/{1}:latest', steps.meta.outputs.registry, inputs.image_name) || '' }}
+            ${{ steps.meta.outputs.registry }}/${{ inputs.image_name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
-    if: ${{ inputs.deploy_enabled }}
     permissions:
       id-token: write
       contents: none
