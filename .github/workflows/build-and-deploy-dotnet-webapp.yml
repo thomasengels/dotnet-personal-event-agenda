@@ -27,15 +27,7 @@ on:
         required: false
         default: 10.0.x
       image_name:
-        description: Image repository name (without registry or tag), e.g. "event-api".
-        type: string
-        required: true
-      registry_login_server:
-        description: Container registry login server, e.g. "myregistry.azurecr.io".
-        type: string
-        required: true
-      acr_name:
-        description: Azure Container Registry name (without .azurecr.io), e.g. "myregistry".
+        description: Image repository name (without registry or tag), e.g. "event-api". Published as ghcr.io/<repository_owner>/<image_name>.
         type: string
         required: true
       container_app_name:
@@ -46,20 +38,6 @@ on:
         description: Resource group that contains the target Container App.
         type: string
         required: true
-      key_vault_name:
-        description: Azure Key Vault name that stores the registry credentials.
-        type: string
-        required: true
-      registry_username_secret_name:
-        description: Key Vault secret name holding the registry username.
-        type: string
-        required: false
-        default: registry-username
-      registry_password_secret_name:
-        description: Key Vault secret name holding the registry password.
-        type: string
-        required: false
-        default: registry-password
       environment_name:
         description: GitHub Environment name used for OIDC and deployment protection rules.
         type: string
@@ -82,10 +60,14 @@ on:
         required: true
       AZURE_SUBSCRIPTION_ID:
         required: true
+      GHCR_PAT:
+        description: GitHub PAT (classic, read:packages) used as the long-lived credential Azure Container Apps uses to pull images from GHCR at runtime.
+        required: true
 
 permissions:
   id-token: write
   contents: read
+  packages: write
 
 jobs:
   ci:
@@ -133,35 +115,22 @@ jobs:
         with:
           ref: ${{ inputs.checkout_ref || github.ref }}
 
-      - name: Log in to Azure
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Fetch registry credentials from Key Vault
-        run: |
-          username=$(az keyvault secret show --vault-name "${{ inputs.key_vault_name }}" --name "${{ inputs.registry_username_secret_name }}" --query value -o tsv)
-          password=$(az keyvault secret show --vault-name "${{ inputs.key_vault_name }}" --name "${{ inputs.registry_password_secret_name }}" --query value -o tsv)
-          echo "::add-mask::$username"
-          echo "::add-mask::$password"
-          echo "REGISTRY_USERNAME=$username" >> "$GITHUB_ENV"
-          echo "REGISTRY_PASSWORD=$password" >> "$GITHUB_ENV"
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to container registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ inputs.registry_login_server }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compute image reference
         id: meta
-        run: echo "image=${{ inputs.registry_login_server }}/${{ inputs.image_name }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+        run: |
+          owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "registry=ghcr.io/${owner}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${owner}/${{ inputs.image_name }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -171,7 +140,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.image }}
-            ${{ inputs.publish_latest && format('{0}/{1}:latest', inputs.registry_login_server, inputs.image_name) || '' }}
+            ${{ inputs.publish_latest && format('{0}/{1}:latest', steps.meta.outputs.registry, inputs.image_name) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -196,7 +165,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Point Container App registry credentials at GHCR
+        run: |
+          az containerapp registry set \
+            --name "${{ inputs.container_app_name }}" \
+            --resource-group "${{ inputs.resource_group }}" \
+            --server ghcr.io \
+            --username "${{ github.actor }}" \
+            --password "${{ secrets.GHCR_PAT }}"
+
       - name: Deploy Container App revision
         uses: azure/container-apps-deploy-action@v1
         with:
-          imageToDeploy: ${{ inputs.registry_login_server }}/${{ inputs.image_name }}:${{ github.sha }}
+          imageToDeploy: ${{ needs.build_and_push.outputs.image }}
