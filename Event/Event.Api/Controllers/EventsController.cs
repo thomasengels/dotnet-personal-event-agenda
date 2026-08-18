@@ -1,26 +1,35 @@
+using Event.Api.Contracts;
+using Event.Application.UseCases;
+using Event.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Event.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EventsController : ControllerBase
+public class EventsController(CreateEventUseCase createEventUseCase, GetEventByIdUseCase getEventByIdUseCase) : ControllerBase
 {
-    [HttpGet]
-    public IActionResult GetEvents()
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetEventById(Guid id, CancellationToken ct)
     {
-        return Ok(new[] { "Event1", "Event2" });
-    }
-
-    [HttpGet("{id:int}")]
-    public IActionResult GetEventById(int id)
-    {
-        return Ok($"Event {id}");
+        var @event = await getEventByIdUseCase.ExecuteAsync(id, ct);
+        return @event is null ? NotFound() : Ok(EventResponse.FromDomain(@event));
     }
 
     [HttpPost]
-    public IActionResult CreateEvent([FromBody] string eventName)
+    public async Task<IActionResult> CreateEvent([FromBody] CreateEventRequest request, CancellationToken ct)
     {
-        return CreatedAtAction(nameof(GetEventById), new { id = 1 }, eventName);
+        try
+        {
+            var location = new Address(request.Street, request.City, request.PostalCode, request.Country);
+            var @event = await createEventUseCase.ExecuteAsync(
+                request.Name, request.Description, location, request.StartDate, request.EndDate, ct);
+
+            return CreatedAtAction(nameof(GetEventById), new { id = @event.Id }, EventResponse.FromDomain(@event));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
