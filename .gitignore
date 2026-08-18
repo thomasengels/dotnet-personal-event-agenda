@@ -54,3 +54,6 @@ appsettings.Local.json
 ## Dotnet local tools and profiling
 .dotnet/
 BenchmarkDotNet.Artifacts/
+
+## Claude Code local settings (personal permission overrides)
+.claude/settings.local.json

@@ -74,15 +74,16 @@ API documentation:
 Containerization and deployment:
 
 1. Docker (one Dockerfile per API)
-2. Azure Container Registry (ACR)
+2. GitHub Container Registry (GHCR)
 3. Azure Container Apps
 4. GitHub Actions (service-specific + reusable shared workflow)
 
 Cloud authentication and secrets:
 
-1. GitHub OIDC federation with Azure (`azure/login@v3`)
-2. Azure Key Vault for registry credentials
-3. Azure RBAC for deployment and secret read permissions
+1. GitHub OIDC federation with Azure (`azure/login@v3`) for managing the Container App
+2. `GITHUB_TOKEN` for pushing images to GHCR during the build
+3. A `GHCR_PAT` GitHub secret as the durable credential Azure Container Apps uses to pull images from GHCR
+4. Azure RBAC for deployment permissions
 
 ## Local Development
 
@@ -125,9 +126,8 @@ The repository is designed to deploy each API independently to Azure Container A
 
 Service entry workflows:
 
-1. `.github/workflows/build-events.yml`
-2. `.github/workflows/build-agenda.yml`
-3. `.github/workflows/build-bff.yml`
+1. `.github/workflows/deploy-production.yml` (push to `master`; builds/deploys agenda, bff, and events)
+2. `.github/workflows/deploy-selected-branch-development.yml` (manual dispatch; pick branch/SHA and service)
 
 Shared reusable workflow:
 
@@ -144,8 +144,8 @@ Each service workflow calls the shared workflow with service-specific inputs and
 Stage behavior:
 
 1. `ci`: restore, build, test, publish test artifacts
-2. `build_and_push`: Azure login (OIDC), read ACR credentials from Key Vault, build and push image to ACR
-3. `deploy`: deploy immutable SHA-tagged image to Azure Container Apps
+2. `build_and_push`: log into GHCR with the workflow's own `GITHUB_TOKEN`, build and push image to `ghcr.io/<owner>/<image_name>`
+3. `deploy`: Azure login (OIDC), point the Container App's registry credentials at GHCR via the `GHCR_PAT` secret, deploy the immutable SHA-tagged image to Azure Container Apps
 
 ### Required GitHub Secrets
 
@@ -154,14 +154,15 @@ Configure these repository or environment secrets:
 1. `AZURE_CLIENT_ID`
 2. `AZURE_TENANT_ID`
 3. `AZURE_SUBSCRIPTION_ID`
+4. `GHCR_PAT` — classic PAT with `read:packages` scope; the long-lived credential Azure Container Apps uses to pull images from GHCR (the workflow's own `GITHUB_TOKEN` expires when the run ends, so it can't be used for this)
 
 ### Required Azure Resources
 
-1. Azure Container Registry
-2. Azure Container Apps environment and app instances
-3. Azure Key Vault storing registry username/password secrets
-4. Entra application with federated credentials for GitHub OIDC
-5. RBAC assignments for deployment and Key Vault secret access
+1. Azure Container Apps environment and app instances
+2. Entra application with federated credentials for GitHub OIDC
+3. RBAC assignments for deployment (Contributor on the resource group)
+
+Images live in GHCR under the repository owner's namespace, not in an Azure resource — no Azure Container Registry or Key Vault is required anymore.
 
 ## Notes
 

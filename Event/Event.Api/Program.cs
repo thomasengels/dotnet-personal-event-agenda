@@ -1,7 +1,5 @@
-using Event.Application.UseCases;
-using Event.Domain.Ports;
+using Event.Application;
 using Event.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,11 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(); // all [ApiController] classes are auto-discovered
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<EventDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("EventDb")));
-builder.Services.AddScoped<IEventRepository, EventRepository>();
-builder.Services.AddScoped<CreateEventUseCase>();
-builder.Services.AddScoped<GetEventByIdUseCase>();
+builder.Services.AddEventInfrastructure(builder.Configuration.GetConnectionString("EventDb")!);
+builder.Services.AddEventApplication();
 
 var app = builder.Build();
 
