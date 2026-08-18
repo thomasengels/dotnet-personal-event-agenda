@@ -30,4 +30,9 @@ public sealed class Event
 
         return new Event(Guid.NewGuid(), name, description, location, startDate, endDate);
     }
+
+    public static Event Reconstitute(Guid id, string name, string? description, Address location, DateTime startDate, DateTime endDate)
+    {
+        return new Event(id, name, description, location, startDate, endDate);
+    }
 }

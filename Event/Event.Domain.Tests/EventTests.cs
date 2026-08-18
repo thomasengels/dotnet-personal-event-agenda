@@ -81,4 +81,16 @@ public class EventTests
 
         Assert.Throws<ArgumentException>(() => Event.CreateNew("Conference", null, ValidAddress(), start, start));
     }
+
+    [Fact]
+    public void Reconstitute_PreservesTheGivenId()
+    {
+        var id = Guid.NewGuid();
+        var start = DateTime.UtcNow;
+        var end = start.AddHours(1);
+
+        var @event = Event.Reconstitute(id, "Conference", null, ValidAddress(), start, end);
+
+        Assert.Equal(id, @event.Id);
+    }
 }
