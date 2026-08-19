@@ -72,4 +72,18 @@ public sealed class AgendaWindowTests
         Assert.Equal(new DateTime(2026, 12, 1), window.Start);
         Assert.Equal(new DateTime(2027, 1, 1), window.End);
     }
+
+    [Fact]
+    public void For_UnspecifiedKindReferenceDate_ReturnsUtcKindBoundaries()
+    {
+        // Downstream calls (e.g. to the Event API) require UTC-kind DateTimes; an
+        // unspecified-kind reference date (e.g. parsed from a plain "date" query
+        // string) must not leak through as Unspecified.
+        var reference = DateTime.SpecifyKind(new DateTime(2026, 8, 19), DateTimeKind.Unspecified);
+
+        var window = AgendaWindow.For(reference, AgendaTimeframe.Day);
+
+        Assert.Equal(DateTimeKind.Utc, window.Start.Kind);
+        Assert.Equal(DateTimeKind.Utc, window.End.Kind);
+    }
 }
