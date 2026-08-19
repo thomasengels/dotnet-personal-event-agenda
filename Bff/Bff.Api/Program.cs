@@ -1,4 +1,5 @@
 using Bff.Api.Services;
+using Bff.Application;
 using Bff.Domain.Services;
 using Scalar.AspNetCore;
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers(); // all [ApiController] classes are auto-discovered
 builder.Services.AddOpenApi();
+builder.Services.AddBffApplication();
 builder.Services.AddHttpClient<IEventClient, EventClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["EventApi:BaseUrl"]!);

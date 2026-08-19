@@ -1,4 +1,6 @@
 using Bff.Api.Contracts;
+using Bff.Application.UseCases;
+using Bff.Domain.Models;
 using Bff.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +8,10 @@ namespace Bff.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DashboardController(IEventClient eventClient, IAgendaClient agendaClient) : ControllerBase
+public class DashboardController(
+    IEventClient eventClient,
+    IAgendaClient agendaClient,
+    GetUserAgendaUseCase getUserAgendaUseCase) : ControllerBase
 {
     [HttpGet("{userId:int}")]
     public IActionResult GetDashboard(int userId)
@@ -17,6 +22,24 @@ public class DashboardController(IEventClient eventClient, IAgendaClient agendaC
             "Upcoming events",
             "Pending invitations"
         });
+    }
+
+    [HttpGet("{userId:int}/agenda")]
+    public async Task<IActionResult> GetUserAgenda(
+        int userId, [FromQuery] DateTime? date, [FromQuery] AgendaTimeframe timeframe, CancellationToken ct)
+    {
+        if (userId <= 0)
+            return BadRequest("userId must be greater than zero.");
+
+        try
+        {
+            var entries = await getUserAgendaUseCase.ExecuteAsync(userId, date, timeframe, ct);
+            return Ok(entries.Select(AgendaEntryResponse.FromDomain));
+        }
+        catch (DownstreamServiceUnavailableException ex)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+        }
     }
 
     [HttpPost("{userId:int}/agenda/events/{eventId:guid}")]
