@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Agenda.Application\Agenda.Application.csproj" />
     <ProjectReference Include="..\Agenda.Domain\Agenda.Domain.csproj" />
+    <ProjectReference Include="..\Agenda.Infrastructure\Agenda.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

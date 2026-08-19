@@ -10,5 +10,17 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  agenda-postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: agenda
+      POSTGRES_PASSWORD: agenda
+      POSTGRES_DB: agenda
+    ports:
+      - "5433:5432"
+    volumes:
+      - agenda-postgres-data:/var/lib/postgresql/data
+
 volumes:
   postgres-data:
+  agenda-postgres-data:
