@@ -60,6 +60,10 @@ After every change, commit it and push to the remote without waiting for explici
 
 After pushing, launch a subagent to follow the resulting GitHub Actions run to completion. If the triggered run fails, have that subagent capture the failing job/step output and launch a bug-fixing subagent (with that failure output) to diagnose and fix the issue.
 
+## Planning and task breakdowns
+
+Any plan document and task breakdown (e.g. from the `planning-and-task-breakdown` skill) must be saved under `docs/plans/<service>/<description>/`, not the skill's default `tasks/` location — e.g. `docs/plans/bff/user-agenda-by-timeframe/plan.md` and `todo.md`. Use the lowercase bounded-context name (`event`, `agenda`, `bff`) for `<service>`, or a cross-cutting name when a plan spans multiple services. This mirrors the existing `docs/plans/event/` spec docs and keeps plans discoverable alongside each service instead of scattered in an untracked `tasks/` folder.
+
 ## Repo-local skill
 
 `.claude/skills/no-mistakes/SKILL.md` (also mirrored at `.agents/skills/no-mistakes/`) defines a `no-mistakes` validation pipeline (review, test, lint, docs, push, PR, CI) driven via the `no-mistakes axi` CLI. Use it when asked to validate, gate, or safely ship changes in this repo.
