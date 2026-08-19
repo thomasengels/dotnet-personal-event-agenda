@@ -10,14 +10,14 @@ new business logic in this feature, so it gets its own domain type and its own t
 built and verified before anything depends on it.
 
 **Acceptance criteria:**
-- [ ] `AgendaTimeframe` enum (`Day`, `Week`, `Month`) exists in `Bff.Domain.Models`
-- [ ] `AgendaWindow` (record/value type) exposes a factory that computes `(DateTime Start, DateTime End)` from a reference `DateTime` and an `AgendaTimeframe`, with `End` exclusive
-- [ ] Week and month boundaries are correct across a year boundary (e.g. week spanning Dec 29 – Jan 4; month of December)
+- [x] `AgendaTimeframe` enum (`Day`, `Week`, `Month`) exists in `Bff.Domain.Models`
+- [x] `AgendaWindow` (record/value type) exposes a factory that computes `(DateTime Start, DateTime End)` from a reference `DateTime` and an `AgendaTimeframe`, with `End` exclusive
+- [x] Week and month boundaries are correct across a year boundary (e.g. week spanning Dec 29 – Jan 4; month of December)
 
 **Verification:**
-- [ ] Tests pass: `dotnet test Bff/Bff.Domain.Tests` (new project, see Files)
-- [ ] Build succeeds: `dotnet build Bff/Bff.sln`
-- [ ] Manual check: none (pure unit-testable logic)
+- [x] Tests pass: `dotnet test Bff/Bff.Domain.Tests` (new project, see Files)
+- [x] Build succeeds: `dotnet build Bff/Bff.sln`
+- [x] Manual check: none (pure unit-testable logic)
 
 **Dependencies:** None
 
@@ -40,14 +40,14 @@ methods the new use case needs. No implementations yet — just the contracts th
 feature is built against.
 
 **Acceptance criteria:**
-- [ ] `AgendaEntry` record in `Bff.Domain.Models` combines an agenda item identity with its `EventSummary`
-- [ ] `IAgendaClient.GetAgendaAsync(int userId, CancellationToken ct)` returns `Task<IReadOnlyList<AgendaItemSummary>>`
-- [ ] `IEventClient.GetEventsAsync(DateTime startDate, DateTime endDate, CancellationToken ct)` returns `Task<IReadOnlyList<EventSummary>>`
-- [ ] Existing methods on both interfaces are untouched (no breaking signature changes)
+- [x] `AgendaEntry` record in `Bff.Domain.Models` combines an agenda item identity with its `EventSummary`
+- [x] `IAgendaClient.GetAgendaAsync(int userId, CancellationToken ct)` returns `Task<IReadOnlyList<AgendaItemSummary>>`
+- [x] `IEventClient.GetEventsAsync(DateTime startDate, DateTime endDate, CancellationToken ct)` returns `Task<IReadOnlyList<EventSummary>>`
+- [x] Existing methods on both interfaces are untouched (no breaking signature changes)
 
 **Verification:**
-- [ ] Build succeeds: `dotnet build Bff/Bff.sln` (will fail until Task 3 implements the new interface members — acceptable to land Task 2+3 together if preferred, see note below)
-- [ ] Manual check: none
+- [x] Build succeeds: `dotnet build Bff/Bff.sln` (will fail until Task 3 implements the new interface members — acceptable to land Task 2+3 together if preferred, see note below)
+- [x] Manual check: none
 
 **Dependencies:** None (can run in parallel with Task 1)
 
@@ -65,9 +65,9 @@ here only because they're conceptually distinct (port contract vs adapter implem
 ---
 
 ## Checkpoint: Domain foundations (after Tasks 1–2)
-- [ ] `dotnet build Bff/Bff.sln` succeeds (once Task 3's adapters exist too, per the note above)
-- [ ] `dotnet test Bff/Bff.Domain.Tests` passes
-- [ ] Review with user before proceeding to orchestration
+- [x] `dotnet build Bff/Bff.sln` succeeds (once Task 3's adapters exist too, per the note above)
+- [x] `dotnet test Bff/Bff.Domain.Tests` passes
+- [x] Review with user before proceeding to orchestration
 
 ---
 
@@ -81,13 +81,13 @@ try/catch → `DownstreamServiceUnavailableException` pattern already used by
 `AddEventToAgendaAsync`/`GetEventByIdAsync`.
 
 **Acceptance criteria:**
-- [ ] `AgendaClient.GetAgendaAsync` GETs `/api/agenda/{userId}`, deserializes to `List<AgendaItemSummary>`, wraps `HttpRequestException`/timeout in `DownstreamServiceUnavailableException("Agenda", ...)`
-- [ ] `EventClient.GetEventsAsync` GETs `/api/events` with `startDate`/`endDate` query params (round-trip `"o"` format), deserializes to `List<EventSummary>`, same exception wrapping with `"Event"`
-- [ ] Both return an empty list rather than throwing when the downstream returns an empty JSON array
+- [x] `AgendaClient.GetAgendaAsync` GETs `/api/agenda/{userId}`, deserializes to `List<AgendaItemSummary>`, wraps `HttpRequestException`/timeout in `DownstreamServiceUnavailableException("Agenda", ...)`
+- [x] `EventClient.GetEventsAsync` GETs `/api/events` with `startDate`/`endDate` query params (round-trip `"o"` format), deserializes to `List<EventSummary>`, same exception wrapping with `"Event"`
+- [x] Both return an empty list rather than throwing when the downstream returns an empty JSON array
 
 **Verification:**
-- [ ] Build succeeds: `dotnet build Bff/Bff.sln`
-- [ ] Manual check: with Agenda.Api and Event.Api running locally, hit each client method via a scratch call (or defer to Task 5's end-to-end check) and confirm real data round-trips
+- [x] Build succeeds: `dotnet build Bff/Bff.sln`
+- [x] Manual check: with Agenda.Api and Event.Api running locally, hit each client method via a scratch call (or defer to Task 5's end-to-end check) and confirm real data round-trips
 
 **Dependencies:** Task 2 (port signatures)
 
@@ -111,16 +111,16 @@ call), otherwise fetches events in the window and joins/sorts by `StartDate`. Ad
 `AgendaApplicationServiceCollectionExtensions`.
 
 **Acceptance criteria:**
-- [ ] `GetUserAgendaUseCase` has exactly one public method, `ExecuteAsync`, per ARCHITECTURE.md rule 2
-- [ ] Returns `AgendaEntry` items sorted ascending by the event's `StartDate`
-- [ ] Agenda items whose `EventId` has no matching event in the window are excluded (no join match)
-- [ ] Empty agenda for the user → `IEventClient.GetEventsAsync` is never called (verified via a spy/mock in tests)
-- [ ] `AddBffApplication()` registers `TimeProvider.System` and `GetUserAgendaUseCase`
+- [x] `GetUserAgendaUseCase` has exactly one public method, `ExecuteAsync`, per ARCHITECTURE.md rule 2
+- [x] Returns `AgendaEntry` items sorted ascending by the event's `StartDate`
+- [x] Agenda items whose `EventId` has no matching event in the window are excluded (no join match)
+- [x] Empty agenda for the user → `IEventClient.GetEventsAsync` is never called (verified via a spy/mock in tests)
+- [x] `AddBffApplication()` registers `TimeProvider.System` and `GetUserAgendaUseCase`
 
 **Verification:**
-- [ ] Tests pass: `dotnet test Bff/Bff.Application.Tests` (new project, mirror `Agenda.Application.Tests` — stub `IAgendaClient`/`IEventClient`, `FakeTimeProvider` pattern already used in `AddEventToAgendaUseCaseTests`)
-- [ ] Build succeeds: `dotnet build Bff/Bff.sln`
-- [ ] Manual check: none yet (wired end-to-end in Task 5)
+- [x] Tests pass: `dotnet test Bff/Bff.Application.Tests` (new project, mirror `Agenda.Application.Tests` — stub `IAgendaClient`/`IEventClient`, `FakeTimeProvider` pattern already used in `AddEventToAgendaUseCaseTests`)
+- [x] Build succeeds: `dotnet build Bff/Bff.sln`
+- [x] Manual check: none yet (wired end-to-end in Task 5)
 
 **Dependencies:** Task 1 (`AgendaWindow`), Task 2 (ports/models)
 
@@ -137,9 +137,9 @@ call), otherwise fetches events in the window and joins/sorts by `StartDate`. Ad
 ---
 
 ## Checkpoint: Orchestration (after Tasks 3–4)
-- [ ] `dotnet test` passes for `Bff.Application.Tests` and `Bff.Domain.Tests`
-- [ ] `dotnet build Bff/Bff.sln` succeeds
-- [ ] Review with user before wiring the public endpoint
+- [x] `dotnet test` passes for `Bff.Application.Tests` and `Bff.Domain.Tests`
+- [x] `dotnet build Bff/Bff.sln` succeeds
+- [x] Review with user before wiring the public endpoint
 
 ---
 
@@ -151,17 +151,17 @@ response contract, DI registration in `Program.cs`, and the remaining project/so
 `Bff.sln` and root `EventPlanner.sln`).
 
 **Acceptance criteria:**
-- [ ] `GET /api/dashboard/{userId}/agenda?date=&timeframe=` (timeframe: `Day`/`Week`/`Month`, default `Day`; date optional, defaults to now) returns the joined agenda entries as JSON
-- [ ] `userId <= 0` → 400, matching the existing validation style in `DashboardController`/`AgendaController`
-- [ ] `DownstreamServiceUnavailableException` → 503, matching the existing catch block in `AddSelectedEventToAgenda`
-- [ ] `Bff.Api.csproj` references `Bff.Application`; `Program.cs` calls `AddBffApplication()`
-- [ ] `Bff.sln` and `EventPlanner.sln` both include `Bff.Application`, `Bff.Application.Tests`, `Bff.Domain.Tests`
+- [x] `GET /api/dashboard/{userId}/agenda?date=&timeframe=` (timeframe: `Day`/`Week`/`Month`, default `Day`; date optional, defaults to now) returns the joined agenda entries as JSON
+- [x] `userId <= 0` → 400, matching the existing validation style in `DashboardController`/`AgendaController`
+- [x] `DownstreamServiceUnavailableException` → 503, matching the existing catch block in `AddSelectedEventToAgenda`
+- [x] `Bff.Api.csproj` references `Bff.Application`; `Program.cs` calls `AddBffApplication()`
+- [x] `Bff.sln` and `EventPlanner.sln` both include `Bff.Application`, `Bff.Application.Tests`, `Bff.Domain.Tests`
 
 **Verification:**
-- [ ] Build succeeds: `dotnet build EventPlanner.sln`
-- [ ] Tests pass: `dotnet test` at repo root (or per new project)
-- [ ] Manual check: start Event.Api, Agenda.Api, Bff.Api locally (`./launch-*.sh` or VS Code "Run All APIs"); `POST` an event onto a user's agenda; call the new endpoint with a day/week/month window covering and then excluding that event's `StartDate`; confirm inclusion, exclusion, and sort order
-- [ ] Manual check: existing `POST /api/dashboard/{userId}/agenda/events/{eventId}` and `GET /api/agenda/{userId}` (Agenda.Api) flows still behave as before (no regression)
+- [x] Build succeeds: `dotnet build EventPlanner.sln`
+- [x] Tests pass: `dotnet test` at repo root (or per new project)
+- [x] Manual check: start Event.Api, Agenda.Api, Bff.Api locally (`./launch-*.sh` or VS Code "Run All APIs"); `POST` an event onto a user's agenda; call the new endpoint with a day/week/month window covering and then excluding that event's `StartDate`; confirm inclusion, exclusion, and sort order
+- [x] Manual check: existing `POST /api/dashboard/{userId}/agenda/events/{eventId}` and `GET /api/agenda/{userId}` (Agenda.Api) flows still behave as before (no regression)
 
 **Dependencies:** Task 3 (adapters), Task 4 (use case)
 
@@ -177,7 +177,7 @@ response contract, DI registration in `Program.cs`, and the remaining project/so
 ---
 
 ## Checkpoint: Complete
-- [ ] All acceptance criteria across Tasks 1–5 met
-- [ ] `dotnet build EventPlanner.sln` and full test suite green
-- [ ] Manual end-to-end check performed and passing
-- [ ] Ready for review
+- [x] All acceptance criteria across Tasks 1–5 met
+- [x] `dotnet build EventPlanner.sln` and full test suite green
+- [x] Manual end-to-end check performed and passing
+- [x] Ready for review
