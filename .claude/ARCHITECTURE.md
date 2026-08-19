@@ -58,43 +58,28 @@ The domain must not contain:
 
 The `Application` layer contains the application's **use cases and orchestration logic**.
 
-Both the use case interface and its implementation belong in `Application`.
+A **use case** is a sealed class representing a single application operation. It exposes exactly one public method, named `ExecuteAsync`, returning a `Task` or `Task<T>`. Dependencies are injected via a primary constructor. Use cases are plain concrete classes — they are not exposed behind a use-case-specific interface; API controllers inject them directly. A use case may have private helper methods, but only one public method.
 
 Example structure:
 
 ```text
 Application/
-└── Orders/
-    └── CreateOrder/
-        ├── ICreateOrderUseCase.cs
-        ├── CreateOrderUseCase.cs
-        └── CreateOrderCommand.cs
+└── UseCases/
+    └── CreateOrderUseCase.cs
 ```
 
 Example:
 
 ```csharp
-public interface ICreateOrderUseCase
+public sealed class CreateOrderUseCase(IOrderRepository repository)
 {
-    Task Execute(CreateOrderCommand command);
-}
-```
-
-```csharp
-public sealed class CreateOrderUseCase : ICreateOrderUseCase
-{
-    private readonly IOrderRepository _repository;
-
-    public CreateOrderUseCase(IOrderRepository repository)
-    {
-        _repository = repository;
-    }
-
-    public async Task Execute(CreateOrderCommand command)
+    public async Task<Order> ExecuteAsync(CreateOrderCommand command, CancellationToken ct)
     {
         var order = Order.Create(command.CustomerId);
 
-        await _repository.Save(order);
+        await repository.Save(order, ct);
+
+        return order;
     }
 }
 ```
@@ -162,18 +147,19 @@ Typical contents:
 * Authentication/authorization integration
 * HTTP-specific validation and mapping
 
-API endpoints inject **Application use case interfaces**, not repositories or infrastructure implementations.
+API endpoints inject **Application use cases**, not repositories or infrastructure implementations.
 
 Example:
 
 ```csharp
-public sealed class OrderController : ControllerBase
+public sealed class OrderController(CreateOrderUseCase createOrder) : ControllerBase
 {
-    private readonly ICreateOrderUseCase _createOrder;
-
-    public OrderController(ICreateOrderUseCase createOrder)
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateOrderCommand command, CancellationToken ct)
     {
-        _createOrder = createOrder;
+        var order = await createOrder.ExecuteAsync(command, ct);
+
+        return Ok(order);
     }
 }
 ```
@@ -185,9 +171,7 @@ HTTP Request
     ↓
 API Controller / Endpoint
     ↓
-Application Use Case Interface
-    ↓
-Application Use Case Implementation
+Application Use Case (ExecuteAsync)
     ↓
 Domain
     ↓
@@ -196,29 +180,13 @@ Repository / Outbound Port
 Infrastructure Implementation
 ```
 
-Or, simplified:
-
-```text
-REST
-  ↓
-Application inbound port
-  ↓
-Application use case
-  ↓
-Domain
-  ↓
-Outbound port
-  ↓
-Infrastructure
-```
-
 ## Architectural Rules
 
 When creating or modifying code, follow these rules:
 
-1. **Use case interfaces belong in `Application`.**
-2. **Use case implementations belong in `Application`.**
-3. **API endpoints depend on Application use case interfaces.**
+1. **Use cases belong in `Application`.**
+2. **A use case is a sealed class with exactly one public method, `ExecuteAsync`.** No use-case-specific interface is required.
+3. **API endpoints depend on Application use cases directly.**
 4. **API endpoints must not directly use repositories.**
 5. **Repository implementations belong in `Infrastructure`.**
 6. **Repository interfaces may belong in `Domain` when they represent a domain persistence abstraction.**

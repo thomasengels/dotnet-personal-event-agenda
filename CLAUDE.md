@@ -48,6 +48,8 @@ Each `Program.cs` follows the same minimal template: `AddControllers()` (control
 
 All projects target `net10.0` with `Nullable` and `ImplicitUsings` enabled.
 
+See `.claude/ARCHITECTURE.md` for the hexagonal-architecture layering rules, including the use case convention: a use case is a sealed class with exactly one public method, `ExecuteAsync`, injected directly into controllers (no use-case-specific interface).
+
 ### Deployment
 
 Each API has its own `Dockerfile` and deploys independently to Azure Container Apps via GitHub Actions. Service entry workflows (`deploy-production.yml`, `deploy-selected-branch-development.yml`) call a shared reusable workflow (`build-and-deploy-dotnet-webapp.yml`) with service-specific inputs, running three jobs in sequence: `ci` (restore/build/test) -> `build_and_push` (login to GHCR with the workflow's own `GITHUB_TOKEN`, image built and pushed to `ghcr.io/<owner>/<image_name>`) -> `deploy` (OIDC login to Azure, point the Container App's registry credentials at GHCR via the `GHCR_PAT` secret, deploy the `build_and_push` job's image output to Container Apps). Registry auth uses GHCR (`GITHUB_TOKEN` for push, a long-lived `GHCR_PAT` for the Container App's pull credential); Azure OIDC federation (`azure/login@v3`, no stored client secrets) is only used to manage the Container App resource itself. See `architecture.md` for the full identity/RBAC setup and the ACR->GHCR migration notes, and `azure-roadmap.md` for known OIDC federated-credential issues (e.g. production environment subject mismatches) and their fixes.
