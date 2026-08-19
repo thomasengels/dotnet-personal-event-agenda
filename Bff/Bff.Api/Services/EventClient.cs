@@ -28,4 +28,25 @@ public sealed class EventClient(HttpClient httpClient) : IEventClient
             throw new DownstreamServiceUnavailableException("Event", ex);
         }
     }
+
+    public async Task<IReadOnlyList<EventSummary>> GetEventsAsync(DateTime startDate, DateTime endDate, CancellationToken ct)
+    {
+        try
+        {
+            var query = $"startDate={Uri.EscapeDataString(startDate.ToString("o"))}&endDate={Uri.EscapeDataString(endDate.ToString("o"))}";
+            using var response = await httpClient.GetAsync($"/api/events?{query}", ct);
+            response.EnsureSuccessStatusCode();
+
+            var events = await response.Content.ReadFromJsonAsync<List<EventSummary>>(cancellationToken: ct);
+            return events ?? [];
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new DownstreamServiceUnavailableException("Event", ex);
+        }
+        catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
+        {
+            throw new DownstreamServiceUnavailableException("Event", ex);
+        }
+    }
 }
