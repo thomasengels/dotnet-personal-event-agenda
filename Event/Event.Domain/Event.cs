@@ -1,8 +1,7 @@
 namespace Event.Domain;
 
-public sealed class Event
+public sealed class Event : Entity<Guid>
 {
-    public Guid Id { get; }
     public string Name { get; }
     public string? Description { get; }
     public Address Location { get; }
@@ -10,8 +9,8 @@ public sealed class Event
     public DateTime EndDate { get; }
 
     private Event(Guid id, string name, string? description, Address location, DateTime startDate, DateTime endDate)
+        : base(id)
     {
-        Id = id;
         Name = name;
         Description = description;
         Location = location;

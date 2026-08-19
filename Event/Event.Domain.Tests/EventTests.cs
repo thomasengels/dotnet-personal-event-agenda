@@ -93,4 +93,29 @@ public class EventTests
 
         Assert.Equal(id, @event.Id);
     }
+
+    [Fact]
+    public void Reconstitute_SameId_AreEqual_EvenWithDifferentProperties()
+    {
+        var id = Guid.NewGuid();
+        var start = DateTime.UtcNow;
+        var end = start.AddHours(1);
+
+        var first = Event.Reconstitute(id, "Conference", null, ValidAddress(), start, end);
+        var second = Event.Reconstitute(id, "Different name", "Different description", ValidAddress(), start.AddDays(1), end.AddDays(1));
+
+        Assert.Equal(first, second);
+    }
+
+    [Fact]
+    public void CreateNew_DistinctCalls_AreNotEqual()
+    {
+        var start = DateTime.UtcNow;
+        var end = start.AddHours(1);
+
+        var first = Event.CreateNew("Conference", null, ValidAddress(), start, end);
+        var second = Event.CreateNew("Conference", null, ValidAddress(), start, end);
+
+        Assert.NotEqual(first, second);
+    }
 }

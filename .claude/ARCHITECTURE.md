@@ -228,5 +228,6 @@ When creating or modifying code, follow these rules:
 10. **Business rules belong in Domain objects whenever possible.**
 11. **Use cases coordinate business behavior; they should not become containers for domain logic.**
 12. **Framework-specific code must remain outside the Domain layer.**
+13. **Id-driven entities must inherit from a common abstract entity base.** Any domain entity identified by an `Id` (as opposed to a value object) inherits from a shared abstract base (e.g. `Entity<TId>`) that owns identity and identity-based equality, rather than each entity hand-rolling its own `Id` property and equality members.
 
 When deciding where new code belongs, prefer the layer based on its responsibility rather than convenience.
