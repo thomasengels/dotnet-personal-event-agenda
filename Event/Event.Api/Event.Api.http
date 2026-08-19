@@ -20,3 +20,13 @@ GET {{Event.Api_HostAddress}}/api/events/00000000-0000-0000-0000-000000000000
 Accept: application/json
 
 ###
+
+GET {{Event.Api_HostAddress}}/api/events
+Accept: application/json
+
+###
+
+GET {{Event.Api_HostAddress}}/api/events?startDate=2026-01-01T00:00:00Z&endDate=2026-12-31T23:59:59Z
+Accept: application/json
+
+###

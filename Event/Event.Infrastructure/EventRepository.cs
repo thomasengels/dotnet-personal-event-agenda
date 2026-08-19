@@ -16,6 +16,19 @@ public sealed class EventRepository(EventDbContext dbContext) : IEventRepository
         return entity is null ? null : ToDomain(entity);
     }
 
+    public async Task<IReadOnlyList<DomainEvent>> GetAllAsync(DateTime start, DateTime? end, CancellationToken ct)
+    {
+        var query = dbContext.Events
+            .AsNoTracking()
+            .Where(e => e.EndDate > start);
+
+        if (end is not null)
+            query = query.Where(e => e.StartDate < end.Value);
+
+        var entities = await query.OrderBy(e => e.StartDate).ToListAsync(ct);
+        return [.. entities.Select(ToDomain)];
+    }
+
     public async Task AddAsync(DomainEvent @event, CancellationToken ct)
     {
         dbContext.Events.Add(ToEntity(@event));

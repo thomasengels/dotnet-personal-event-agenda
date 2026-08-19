@@ -7,8 +7,21 @@ namespace Event.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EventsController(CreateEventUseCase createEventUseCase, GetEventByIdUseCase getEventByIdUseCase) : ControllerBase
+public class EventsController(
+    CreateEventUseCase createEventUseCase,
+    GetEventByIdUseCase getEventByIdUseCase,
+    GetEventsUseCase getEventsUseCase) : ControllerBase
 {
+    [HttpGet]
+    public async Task<IActionResult> GetEvents([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, CancellationToken ct)
+    {
+        if (endDate is not null && startDate is not null && endDate < startDate)
+            return BadRequest("endDate must not be before startDate.");
+
+        var events = await getEventsUseCase.ExecuteAsync(startDate, endDate, ct);
+        return Ok(events.Select(EventResponse.FromDomain));
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetEventById(Guid id, CancellationToken ct)
     {
